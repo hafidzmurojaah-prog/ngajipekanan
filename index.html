@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khotmil Qur'an Berjamaah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 text-sm">
+
+    <!-- Header -->
+    <header class="bg-emerald-800 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-5 text-center">
+            <h1 class="text-xl md:text-2xl font-bold">Khotmil Qur'an Berjamaah</h1>
+            <p class="text-emerald-200 text-xs mt-1">Siklus Rutin & Doa Hajat Bersama</p>
+            
+            <div class="mt-3 inline-flex flex-wrap items-center justify-center gap-2 bg-emerald-900/60 px-3 py-1.5 rounded-full text-xs border border-emerald-700">
+                <span id="sync-status" class="flex items-center gap-1.5 font-medium text-amber-300">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 inline-block" id="status-dot"></span>
+                    <span id="status-text">Memeriksa...</span>
+                </span>
+                <span class="text-emerald-400">|</span>
+                <span id="malam-jumat-display" class="font-medium text-emerald-100">📅 Memuat...</span>
+                <span class="text-emerald-400">|</span>
+                <span id="mode-display" class="font-medium">Jamaah</span>
+                <button id="admin-toggle-btn" onclick="toggleAdminMode()" class="ml-1 bg-emerald-700 hover:bg-emerald-600 px-2.5 py-0.5 rounded text-white transition">Admin</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-3 py-5">
+        <!-- Controls & Search -->
+        <div class="flex flex-col md:flex-row justify-between items-center gap-3 mb-4 bg-white p-3 rounded-xl shadow-sm border border-slate-100">
+            <div class="w-full md:w-auto">
+                <input type="text" id="search-input" placeholder="Cari juz atau nama..." class="w-full md:w-72 px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs" oninput="renderDashboard()">
+            </div>
+            <div id="admin-controls" class="hidden flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+                <button onclick="openSettingsModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">⚙️ Pengaturan URL</button>
+                <button onclick="resetJumatData()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-lg text-xs font-medium transition">🔄 Reset Jumat</button>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="flex flex-wrap gap-1.5 mb-4" id="filter-tabs">
+            <button onclick="setFilter('Semua')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition shadow-sm" data-filter="Semua">Semua</button>
+            <button onclick="setFilter('Tersedia')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm" data-filter="Tersedia">Tersedia</button>
+            <button onclick="setFilter('Dibaca')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm" data-filter="Dibaca">Dibaca</button>
+            <button onclick="setFilter('Selesai')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm" data-filter="Selesai">Selesai</button>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-3 gap-2.5 mb-5">
+            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                <p class="text-[10px] text-slate-500 font-medium">Progress</p>
+                <h3 id="stat-progress" class="text-sm md:text-base font-bold text-slate-800 mt-1">0 / 30</h3>
+            </div>
+            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                <p class="text-[10px] text-slate-500 font-medium">Jamaah</p>
+                <h3 id="stat-participants" class="text-sm md:text-base font-bold text-slate-800 mt-1">0 Orang</h3>
+            </div>
+            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                <p class="text-[10px] text-slate-500 font-medium">Doa Hajat</p>
+                <h3 id="stat-duas" class="text-sm md:text-base font-bold text-slate-800 mt-1">0 Doa</h3>
+            </div>
+        </div>
+
+        <!-- Juz Grid (Compact & Mobile Friendly) -->
+        <div id="juz-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
+            <!-- Rendered by JavaScript -->
+        </div>
+    </main>
+
+    <!-- Modal Ambil Juz -->
+    <div id="take-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl relative">
+            <h3 class="text-base font-bold text-slate-800 mb-3">Ambil Juz <span id="modal-juz-num"></span></h3>
+            <form id="take-form" onsubmit="submitTakeJuz(event)">
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nama Lengkap</label>
+                        <input type="text" id="input-name" required class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Nama Anda">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nomor WhatsApp</label>
+                        <input type="text" id="input-wa" required class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="08123456789">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Doa / Hajat (Opsional)</label>
+                        <textarea id="input-dua" rows="2" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Tuliskan doa..."></textarea>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end gap-2">
+                    <button type="button" onclick="closeTakeModal()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50">Batal</button>
+                    <button type="submit" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Pengaturan URL -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl relative">
+            <h3 class="text-base font-bold text-slate-800 mb-1">Pengaturan Server</h3>
+            <p class="text-[11px] text-slate-500 mb-3">Masukkan URL Web App Google Apps Script.</p>
+            <input type="text" id="input-api-url" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 mb-3" placeholder="https://script.google.com/macros/s/.../exec">
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="closeSettingsModal()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50">Batal</button>
+                <button type="button" onclick="saveSettings()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PIN = "945326";
+        let isAdmin = false;
+        
+        // PENTING: Anda bisa menempelkan URL Web App Apps Script Anda langsung di dalam tanda kutip di bawah ini agar otomatis terhubung!
+        let API_URL = "https://script.google.com/macros/s/AKfycby-aKpExt7-3ZRDPOfdo4YliLQlIH1CcJ-Huj5UlRFso2UbFcm-eeHiyLA3ZEhsp647hg/exec";
+        
+        let currentFilter = 'Semua';
+        let juzData = [];
+
+        for (let i = 1; i <= 30; i++) {
+            juzData.push({ juz: i, status: "Tersedia", name: "", whatsapp: "", dua: "" });
+        }
+
+        window.onload = function() {
+            updateMalamJumatDisplay();
+            if (API_URL) {
+                fetchDataFromServer();
+                setInterval(fetchDataFromServer, 10000);
+            } else {
+                setSyncStatus('offline', 'Belum terhubung');
+                renderDashboard();
+            }
+        };
+
+        function updateMalamJumatDisplay(customDateStr) {
+            let targetDate;
+            if (customDateStr) {
+                targetDate = new Date(customDateStr);
+            } else {
+                let savedDate = localStorage.getItem('malam_jumat_date');
+                if (savedDate) {
+                    targetDate = new Date(savedDate);
+                } else {
+                    targetDate = getNextThursdayDate();
+                    localStorage.setItem('malam_jumat_date', targetDate.toISOString());
+                }
+            }
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            const formattedDate = targetDate.toLocaleDateString('id-ID', options);
+            document.getElementById('malam-jumat-display').innerText = `📅 Kamis, ${formattedDate.replace(/^.*?, /, '')}`;
+        }
+
+        function getNextThursdayDate() {
+            let d = new Date();
+            let day = d.getDay();
+            let diff = (4 - day + 7) % 7;
+            if (diff === 0 && d.getHours() >= 21) diff = 7;
+            d.setDate(d.getDate() + diff);
+            return d;
+        }
+
+        function setSyncStatus(status, text) {
+            const dot = document.getElementById('status-dot');
+            const txt = document.getElementById('status-text');
+            txt.innerText = text;
+            if (status === 'online') {
+                dot.className = "w-2 h-2 rounded-full bg-emerald-400 inline-block";
+            } else if (status === 'syncing') {
+                dot.className = "w-2 h-2 rounded-full bg-amber-400 inline-block animate-pulse";
+            } else {
+                dot.className = "w-2 h-2 rounded-full bg-rose-400 inline-block";
+            }
+        }
+
+        async function fetchDataFromServer() {
+            if (!API_URL) return;
+            setSyncStatus('syncing', 'Sinkron...');
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    juzData = data;
+                    setSyncStatus('online', 'Terhubung Server');
+                    renderDashboard();
+                }
+            } catch (err) {
+                console.error(err);
+                setSyncStatus('offline', 'Gangguan Koneksi');
+            }
+        }
+
+        async function sendActionToServer(payload) {
+            if (!API_URL) {
+                alert("URL Server belum diatur!");
+                return;
+            }
+            setSyncStatus('syncing', 'Menyimpan...');
+            try {
+                const params = new URLSearchParams(payload).toString();
+                const targetUrl = API_URL.includes('?') ? `${API_URL}&${params}` : `${API_URL}?${params}`;
+                const response = await fetch(targetUrl);
+                await response.json();
+                await fetchDataFromServer();
+            } catch (err) {
+                console.error(err);
+                setSyncStatus('offline', 'Gagal simpan');
+                alert("Gagal menyimpan ke server.");
+            }
+        }
+
+        function setFilter(filterType) {
+            currentFilter = filterType;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.getAttribute('data-filter') === filterType) {
+                    btn.className = "filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition shadow-sm";
+                } else {
+                    btn.className = "filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm";
+                }
+            });
+            renderDashboard();
+        }
+
+        function renderDashboard() {
+            const grid = document.getElementById('juz-grid');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            grid.innerHTML = "";
+
+            let completedCount = 0;
+            let participantSet = new Set();
+            let duaCount = 0;
+
+            juzData.forEach(item => {
+                if (item.status === 'Selesai') completedCount++;
+                if (item.name) participantSet.add(item.name);
+                if (item.dua) duaCount++;
+
+                if (currentFilter !== 'Semua') {
+                    if (currentFilter === 'Tersedia' && item.status !== 'Tersedia') return;
+                    if (currentFilter === 'Dibaca' && item.status !== 'Sedang Dibaca') return;
+                    if (currentFilter === 'Selesai' && item.status !== 'Selesai') return;
+                }
+
+                if (search && !item.juz.toString().includes(search) && !(item.name && item.name.toLowerCase().includes(search))) {
+                    return;
+                }
+
+                const isTaken = item.status === 'Sedang Dibaca' || item.status === 'Selesai';
+                
+                const card = document.createElement('div');
+                card.className = `p-3 rounded-xl border transition bg-white shadow-sm flex flex-col justify-between ${isTaken ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-100'}`;
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-slate-800 text-sm">Juz ${item.juz}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${item.status === 'Selesai' ? 'bg-blue-100 text-blue-700' : (item.status === 'Sedang Dibaca' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500')}">
+                                ${item.status}
+                            </span>
+                        </div>
+                        <p class="text-[10px] text-slate-400">Pembaca:</p>
+                        <p class="text-xs font-medium text-slate-700 mb-1.5 truncate">${item.name || '-'}</p>
+                        <p class="text-[10px] text-slate-400">Doa:</p>
+                        <p class="text-[11px] text-slate-600 italic bg-slate-50 p-1.5 rounded border border-slate-100 mb-3 line-clamp-2">${item.dua || 'Tanpa Doa'}</p>
+                    </div>
+                    <div class="flex gap-1.5">
+                        ${!isTaken ? 
+                            `<button onclick="openTakeModal(${item.juz})" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition">Ambil</button>` :
+                            (isAdmin ? 
+                                `<button onclick="releaseJuz(${item.juz})" class="w-1/2 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[10px] font-medium transition">Batal</button>
+                                 <button onclick="toggleKhatam(${item.juz})" class="w-1/2 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[10px] font-medium transition">${item.status === 'Selesai' ? 'Batal' : 'Selesai'}</button>` :
+                                `<div class="w-full py-1.5 text-center text-[10px] text-slate-400 font-medium bg-slate-100 rounded-lg">Terisi</div>`
+                            )
+                        }
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            document.getElementById('stat-progress').innerText = `${completedCount} / 30`;
+            document.getElementById('stat-participants').innerText = `${participantSet.size} Orang`;
+            document.getElementById('stat-duas').innerText = `${duaCount} Doa`;
+        }
+
+        let activeJuz = null;
+        function openTakeModal(juzNum) {
+            activeJuz = juzNum;
+            document.getElementById('modal-juz-num').innerText = juzNum;
+            document.getElementById('take-modal').classList.remove('hidden');
+            document.getElementById('take-modal').classList.add('flex');
+        }
+        function closeTakeModal() {
+            document.getElementById('take-modal').classList.add('hidden');
+            document.getElementById('take-modal').classList.remove('flex');
+            document.getElementById('take-form').reset();
+        }
+
+        function submitTakeJuz(e) {
+            e.preventDefault();
+            const name = document.getElementById('input-name').value;
+            const whatsapp = document.getElementById('input-wa').value;
+            const dua = document.getElementById('input-dua').value;
+
+            closeTakeModal();
+            sendActionToServer({ action: 'take', juz: activeJuz, name, whatsapp, dua });
+        }
+
+        function releaseJuz(juzNum) {
+            if (confirm(`Batalkan pengambilan Juz ${juzNum}?`)) {
+                sendActionToServer({ action: 'release', juz: juzNum });
+            }
+        }
+
+        function toggleKhatam(juzNum) {
+            sendActionToServer({ action: 'toggle_khatam', juz: juzNum });
+        }
+
+        function resetJumatData() {
+            if (confirm("Reset semua data dan geser jadwal ke pekan depan?")) {
+                let currentStoredDate = localStorage.getItem('malam_jumat_date');
+                let targetDate = currentStoredDate ? new Date(currentStoredDate) : new Date();
+                targetDate.setDate(targetDate.getDate() + 7);
+                localStorage.setItem('malam_jumat_date', targetDate.toISOString());
+                updateMalamJumatDisplay(targetDate);
+
+                sendActionToServer({ action: 'reset' });
+            }
+        }
+
+        function toggleAdminMode() {
+            if (!isAdmin) {
+                const pin = prompt("Masukkan PIN Admin:");
+                if (pin === ADMIN_PIN) {
+                    isAdmin = true;
+                    document.getElementById('mode-display').innerText = "Admin";
+                    document.getElementById('admin-controls').classList.remove('hidden');
+                    document.getElementById('admin-toggle-btn').innerText = "Keluar";
+                    renderDashboard();
+                } else if (pin !== null) {
+                    alert("PIN salah!");
+                }
+            } else {
+                isAdmin = false;
+                document.getElementById('mode-display').innerText = "Jamaah";
+                document.getElementById('admin-controls').classList.add('hidden');
+                document.getElementById('admin-toggle-btn').innerText = "Admin";
+                renderDashboard();
+            }
+        }
+
+        function openSettingsModal() {
+            document.getElementById('input-api-url').value = API_URL;
+            document.getElementById('settings-modal').classList.remove('hidden');
+            document.getElementById('settings-modal').classList.add('flex');
+        }
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.add('hidden');
+            document.getElementById('settings-modal').classList.remove('flex');
+        }
+        function saveSettings() {
+            API_URL = document.getElementById('input-api-url').value.trim();
+            localStorage.setItem('khotmil_api_url', API_URL);
+            closeSettingsModal();
+            if (API_URL) {
+                fetchDataFromServer();
+                alert("Pengaturan disimpan!");
+            }
+        }
+    </script>
+</body>
+</html>
