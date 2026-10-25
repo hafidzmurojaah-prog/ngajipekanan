@@ -36,17 +36,10 @@
     <main class="max-w-7xl mx-auto px-3 py-5">
         
         <!-- Main Navigation Tabs -->
-        <div class="flex flex-wrap gap-2 mb-4 border-b border-slate-200 pb-2 justify-between items-center">
-            <div class="flex gap-2">
-                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white transition shadow-sm">Dashboard Juz (30)</button>
-                <button onclick="switchTab('rekap')" id="tab-rekap" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm">🤲 Rekap Doa Hajat</button>
-                <button onclick="switchTab('history')" id="tab-history" class="hidden px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm">📊 Riwayat Reminder</button>
-            </div>
-            <div id="admin-reminder-menu" class="hidden">
-                <button onclick="openReminderModal()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white transition shadow-sm flex items-center gap-1">
-                    <span>📢 Kirim Reminder Ngaji</span>
-                </button>
-            </div>
+        <div class="flex gap-2 mb-4 border-b border-slate-200 pb-2">
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white transition shadow-sm">Dashboard Juz (30)</button>
+            <button onclick="switchTab('rekap')" id="tab-rekap" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm">🤲 Rekap Doa Hajat</button>
+            <button onclick="switchTab('history')" id="tab-history" class="hidden px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm">📊 Riwayat Reminder</button>
         </div>
 
         <!-- Controls & Search -->
@@ -54,14 +47,16 @@
             <div class="flex items-center gap-2 w-full md:w-auto">
                 <input type="text" id="search-input" placeholder="Cari juz atau nama..." class="w-full md:w-64 px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs" oninput="renderDashboard()">
             </div>
-            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end flex-wrap">
                 <button onclick="openTakeModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-sm">
                     <span>+ Ambil Juz</span>
                 </button>
-                <div id="admin-controls" class="hidden flex items-center gap-2">
-                    <button onclick="openSettingsModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">⚙️ URL</button>
+                <!-- Menu Khusus Admin langsung muncul di sini -->
+                <div id="admin-controls" class="hidden flex items-center gap-2 flex-wrap">
+                    <button onclick="openReminderModal()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white transition shadow-sm">📢 Kirim Reminder WA</button>
                     <button onclick="openTargetModal()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-medium transition">📅 Set Target</button>
                     <button onclick="resetJumatData()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-lg text-xs font-medium transition">🔄 Reset</button>
+                    <button onclick="openSettingsModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">⚙️ URL</button>
                 </div>
             </div>
         </div>
@@ -592,7 +587,6 @@
                     isAdmin = true;
                     document.getElementById('mode-display').innerText = "Admin";
                     document.getElementById('admin-controls').classList.remove('hidden');
-                    document.getElementById('admin-reminder-menu').classList.remove('hidden');
                     document.getElementById('tab-history').classList.remove('hidden');
                     document.getElementById('admin-toggle-btn').innerText = "Keluar";
                     renderDashboard();
@@ -603,7 +597,6 @@
                 isAdmin = false;
                 document.getElementById('mode-display').innerText = "Jamaah";
                 document.getElementById('admin-controls').classList.add('hidden');
-                document.getElementById('admin-reminder-menu').classList.add('hidden');
                 document.getElementById('tab-history').classList.add('hidden');
                 if (currentTab === 'history') switchTab('dashboard');
                 document.getElementById('admin-toggle-btn').innerText = "Admin";
