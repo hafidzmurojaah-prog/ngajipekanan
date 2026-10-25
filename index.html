@@ -16,7 +16,7 @@
     <header class="bg-emerald-800 text-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-5 text-center">
             <h1 class="text-xl md:text-2xl font-bold">Khotmil Qur'an Berjamaah</h1>
-            <p class="text-emerald-200 text-xs mt-1">Siklus Rutin & Doa Hajat Bersama</p>
+            <p class="text-emerald-200 text-xs mt-1">Ngaji Pekanan Rutin & Doa Bersama</p>
             
             <div class="mt-3 inline-flex flex-wrap items-center justify-center gap-2 bg-emerald-900/60 px-3 py-1.5 rounded-full text-xs border border-emerald-700">
                 <span id="sync-status" class="flex items-center gap-1.5 font-medium text-amber-300">
@@ -24,7 +24,7 @@
                     <span id="status-text">Memeriksa...</span>
                 </span>
                 <span class="text-emerald-400">|</span>
-                <span id="malam-jumat-display" class="font-medium text-emerald-100">📅 Memuat...</span>
+                <span id="malam-jumat-display" class="font-medium text-emerald-100">📅 Batas Akhir Malam Jum'at: Memuat...</span>
                 <span class="text-emerald-400">|</span>
                 <span id="mode-display" class="font-medium">Jamaah</span>
                 <button id="admin-toggle-btn" onclick="toggleAdminMode()" class="ml-1 bg-emerald-700 hover:bg-emerald-600 px-2.5 py-0.5 rounded text-white transition">Admin</button>
@@ -34,53 +34,92 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-3 py-5">
+        
+        <!-- Main Navigation Tabs -->
+        <div class="flex flex-wrap gap-2 mb-4 border-b border-slate-200 pb-2 justify-between items-center">
+            <div class="flex gap-2">
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white transition shadow-sm">Dashboard Juz (30)</button>
+                <button onclick="switchTab('rekap')" id="tab-rekap" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm">🤲 Rekap Doa Hajat</button>
+            </div>
+            <div id="admin-reminder-menu" class="hidden">
+                <button onclick="openReminderModal()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white transition shadow-sm flex items-center gap-1">
+                    <span>📢 Kirim Reminder Ngaji</span>
+                </button>
+            </div>
+        </div>
+
         <!-- Controls & Search -->
         <div class="flex flex-col md:flex-row justify-between items-center gap-3 mb-4 bg-white p-3 rounded-xl shadow-sm border border-slate-100">
-            <div class="w-full md:w-auto">
-                <input type="text" id="search-input" placeholder="Cari juz atau nama..." class="w-full md:w-72 px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs" oninput="renderDashboard()">
+            <div class="flex items-center gap-2 w-full md:w-auto">
+                <input type="text" id="search-input" placeholder="Cari juz atau nama..." class="w-full md:w-64 px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs" oninput="renderDashboard()">
             </div>
-            <div id="admin-controls" class="hidden flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
-                <button onclick="openSettingsModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">⚙️ Pengaturan URL</button>
-                <button onclick="resetJumatData()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-lg text-xs font-medium transition">🔄 Reset Jumat</button>
-            </div>
-        </div>
-
-        <!-- Filter Tabs -->
-        <div class="flex flex-wrap gap-1.5 mb-4" id="filter-tabs">
-            <button onclick="setFilter('Semua')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition shadow-sm" data-filter="Semua">Semua</button>
-            <button onclick="setFilter('Tersedia')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm" data-filter="Tersedia">Tersedia</button>
-            <button onclick="setFilter('Dibaca')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm" data-filter="Dibaca">Dibaca</button>
-            <button onclick="setFilter('Selesai')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm" data-filter="Selesai">Selesai</button>
-        </div>
-
-        <!-- Stats Overview -->
-        <div class="grid grid-cols-3 gap-2.5 mb-5">
-            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between">
-                <p class="text-[10px] text-slate-500 font-medium">Progress</p>
-                <h3 id="stat-progress" class="text-sm md:text-base font-bold text-slate-800 mt-1">0 / 30</h3>
-            </div>
-            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between">
-                <p class="text-[10px] text-slate-500 font-medium">Jamaah</p>
-                <h3 id="stat-participants" class="text-sm md:text-base font-bold text-slate-800 mt-1">0 Orang</h3>
-            </div>
-            <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between">
-                <p class="text-[10px] text-slate-500 font-medium">Doa Hajat</p>
-                <h3 id="stat-duas" class="text-sm md:text-base font-bold text-slate-800 mt-1">0 Doa</h3>
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+                <button onclick="openTakeModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 shadow-sm">
+                    <span>+ Ambil Juz</span>
+                </button>
+                <div id="admin-controls" class="hidden flex items-center gap-2">
+                    <button onclick="openSettingsModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">⚙️ URL</button>
+                    <button onclick="openTargetModal()" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-medium transition">📅 Set Target</button>
+                    <button onclick="resetJumatData()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-lg text-xs font-medium transition">🔄 Reset</button>
+                </div>
             </div>
         </div>
 
-        <!-- Juz Grid (Compact & Mobile Friendly) -->
-        <div id="juz-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
-            <!-- Rendered by JavaScript -->
+        <!-- VIEW 1: DASHBOARD JUZ -->
+        <div id="view-dashboard">
+            <!-- Filter Tabs -->
+            <div class="flex flex-wrap gap-1.5 mb-4" id="filter-tabs">
+                <button onclick="setFilter('Semua')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition shadow-sm" data-filter="Semua">Semua</button>
+                <button onclick="setFilter('Tersedia')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm" data-filter="Tersedia">Tersedia</button>
+                <button onclick="setFilter('Dibaca')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm" data-filter="Dibaca">Dibaca</button>
+                <button onclick="setFilter('Selesai')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm" data-filter="Selesai">Selesai</button>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-3 gap-2.5 mb-5">
+                <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <p class="text-[10px] text-slate-500 font-medium">Progress</p>
+                    <h3 id="stat-progress" class="text-sm md:text-base font-bold text-slate-800 mt-1">0 / 30</h3>
+                </div>
+                <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <p class="text-[10px] text-slate-500 font-medium">Jamaah</p>
+                    <h3 id="stat-participants" class="text-sm md:text-base font-bold text-slate-800 mt-1">0 Orang</h3>
+                </div>
+                <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <p class="text-[10px] text-slate-500 font-medium">Doa Hajat</p>
+                    <h3 id="stat-duas" class="text-sm md:text-base font-bold text-slate-800 mt-1">0 Doa</h3>
+                </div>
+            </div>
+
+            <!-- Juz Grid -->
+            <div id="juz-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
+                <!-- Rendered by JavaScript -->
+            </div>
         </div>
+
+        <!-- VIEW 2: REKAP DOA HAJAT -->
+        <div id="view-rekap" class="hidden space-y-3">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                <h3 class="font-bold text-slate-800 mb-3 text-sm flex items-center gap-2">🤲 Daftar Rekap Doa & Hajat Jamaah</h3>
+                <div id="rekap-list" class="space-y-2.5">
+                    <!-- Rendered by JavaScript -->
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <!-- Modal Ambil Juz -->
     <div id="take-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl relative">
-            <h3 class="text-base font-bold text-slate-800 mb-3">Ambil Juz <span id="modal-juz-num"></span></h3>
+            <h3 class="text-base font-bold text-slate-800 mb-3">Ambil Juz</h3>
             <form id="take-form" onsubmit="submitTakeJuz(event)">
                 <div class="space-y-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Pilih Nomor Juz</label>
+                        <select id="input-juz-num" required class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                        </select>
+                    </div>
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nama Lengkap</label>
                         <input type="text" id="input-name" required class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Nama Anda">
@@ -102,6 +141,33 @@
         </div>
     </div>
 
+    <!-- Modal Pengaturan Target Malam Jumat -->
+    <div id="target-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl relative">
+            <h3 class="text-base font-bold text-slate-800 mb-1">Pengaturan Target Malam Jumat</h3>
+            <p class="text-[11px] text-slate-500 mb-3">Tentukan batas akhir tanggal penyelesaian.</p>
+            <input type="date" id="input-target-date" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 mb-3">
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="closeTargetModal()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50">Batal</button>
+                <button type="button" onclick="saveTargetDate()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Reminder WhatsApp Admin -->
+    <div id="reminder-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-xl relative">
+            <h3 class="text-base font-bold text-slate-800 mb-1">📢 Kirim Reminder Ngaji</h3>
+            <p id="reminder-summary-info" class="text-[11px] text-slate-500 mb-3">Memeriksa jumlah penerima...</p>
+            <div id="reminder-recipient-list" class="max-h-48 overflow-y-auto space-y-2 mb-4 border border-slate-100 p-2 rounded bg-slate-50 text-xs">
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="closeReminderModal()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50">Tutup</button>
+                <button type="button" id="btn-send-reminder" onclick="executeSendReminders()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-medium transition">Kirim Pesan WhatsApp</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Pengaturan URL -->
     <div id="settings-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl relative">
@@ -118,11 +184,9 @@
     <script>
         const ADMIN_PIN = "945326";
         let isAdmin = false;
-        
-        // PENTING: Anda bisa menempelkan URL Web App Apps Script Anda langsung di dalam tanda kutip di bawah ini agar otomatis terhubung!
-        let API_URL = "https://script.google.com/macros/s/AKfycby-aKpExt7-3ZRDPOfdo4YliLQlIH1CcJ-Huj5UlRFso2UbFcm-eeHiyLA3ZEhsp647hg/exec";
-        
+        let API_URL = "https://script.google.com/macros/s/AKfycbxUtTuo40sxJJfkha1N7WbQabDVOzgPfqqjr9u9HB1ikHJYbzAoEsfz0MP2yJfYzOc-/exec";
         let currentFilter = 'Semua';
+        let currentTab = 'dashboard';
         let juzData = [];
 
         for (let i = 1; i <= 30; i++) {
@@ -131,14 +195,35 @@
 
         window.onload = function() {
             updateMalamJumatDisplay();
+            renderDashboard();
             if (API_URL) {
                 fetchDataFromServer();
                 setInterval(fetchDataFromServer, 10000);
             } else {
                 setSyncStatus('offline', 'Belum terhubung');
-                renderDashboard();
             }
         };
+
+        function switchTab(tab) {
+            currentTab = tab;
+            const btnDash = document.getElementById('tab-dashboard');
+            const btnRekap = document.getElementById('tab-rekap');
+            const viewDash = document.getElementById('view-dashboard');
+            const viewRekap = document.getElementById('view-rekap');
+
+            if (tab === 'dashboard') {
+                btnDash.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white transition shadow-sm";
+                btnRekap.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm";
+                viewDash.classList.remove('hidden');
+                viewRekap.classList.add('hidden');
+            } else {
+                btnRekap.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white transition shadow-sm";
+                btnDash.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm";
+                viewRekap.classList.remove('hidden');
+                viewDash.classList.add('hidden');
+                renderRekapDoa();
+            }
+        }
 
         function updateMalamJumatDisplay(customDateStr) {
             let targetDate;
@@ -155,7 +240,25 @@
             }
             const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
             const formattedDate = targetDate.toLocaleDateString('id-ID', options);
-            document.getElementById('malam-jumat-display').innerText = `📅 Kamis, ${formattedDate.replace(/^.*?, /, '')}`;
+            document.getElementById('malam-jumat-display').innerText = `📅 Batas Akhir Malam Jum'at: Kamis, ${formattedDate.replace(/^.*?, /, '')}`;
+        }
+
+        function getRemainingDays() {
+            let savedDate = localStorage.getItem('malam_jumat_date');
+            let targetDate = savedDate ? new Date(savedDate) : getNextThursdayDate();
+            let today = new Date();
+            today.setHours(0,0,0,0);
+            targetDate.setHours(0,0,0,0);
+            let diffTime = targetDate - today;
+            let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays < 0 ? 0 : diffDays;
+        }
+
+        function getFormattedTargetDateString() {
+            let savedDate = localStorage.getItem('malam_jumat_date');
+            let targetDate = savedDate ? new Date(savedDate) : getNextThursdayDate();
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            return targetDate.toLocaleDateString('id-ID', options);
         }
 
         function getNextThursdayDate() {
@@ -190,6 +293,7 @@
                     juzData = data;
                     setSyncStatus('online', 'Terhubung Server');
                     renderDashboard();
+                    if (currentTab === 'rekap') renderRekapDoa();
                 }
             } catch (err) {
                 console.error(err);
@@ -253,6 +357,7 @@
                 }
 
                 const isTaken = item.status === 'Sedang Dibaca' || item.status === 'Selesai';
+                const isSelesai = item.status === 'Selesai';
                 
                 const card = document.createElement('div');
                 card.className = `p-3 rounded-xl border transition bg-white shadow-sm flex flex-col justify-between ${isTaken ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-100'}`;
@@ -261,7 +366,7 @@
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <span class="font-bold text-slate-800 text-sm">Juz ${item.juz}</span>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${item.status === 'Selesai' ? 'bg-blue-100 text-blue-700' : (item.status === 'Sedang Dibaca' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500')}">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${isSelesai ? 'bg-blue-100 text-blue-700' : (item.status === 'Sedang Dibaca' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500')}">
                                 ${item.status}
                             </span>
                         </div>
@@ -272,11 +377,16 @@
                     </div>
                     <div class="flex gap-1.5">
                         ${!isTaken ? 
-                            `<button onclick="openTakeModal(${item.juz})" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition">Ambil</button>` :
-                            (isAdmin ? 
-                                `<button onclick="releaseJuz(${item.juz})" class="w-1/2 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[10px] font-medium transition">Batal</button>
-                                 <button onclick="toggleKhatam(${item.juz})" class="w-1/2 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[10px] font-medium transition">${item.status === 'Selesai' ? 'Batal' : 'Selesai'}</button>` :
-                                `<div class="w-full py-1.5 text-center text-[10px] text-slate-400 font-medium bg-slate-100 rounded-lg">Terisi</div>`
+                            `<button onclick="openTakeModalSpecific(${item.juz})" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition">Ambil</button>` :
+                            (isSelesai ? 
+                                `<div class="w-full flex gap-1">
+                                    <button onclick="toggleSelesai(${item.juz})" class="w-full py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[10px] font-medium transition">Selesai ✓</button>
+                                    ${isAdmin ? `<button onclick="releaseJuz(${item.juz})" class="px-2 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[10px]" title="Batalkan">×</button>` : ''}
+                                 </div>` :
+                                `<div class="w-full flex gap-1">
+                                    <button onclick="toggleSelesai(${item.juz})" class="w-1/2 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-medium transition">Selesai?</button>
+                                    ${isAdmin ? `<button onclick="releaseJuz(${item.juz})" class="w-1/2 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[10px] font-medium transition">Batal</button>` : `<div class="w-1/2 py-1.5 text-center text-[10px] text-slate-400 font-medium bg-slate-100 rounded-lg flex items-center justify-center">Dibaca</div>`}
+                                 </div>`
                             )
                         }
                     </div>
@@ -289,13 +399,61 @@
             document.getElementById('stat-duas').innerText = `${duaCount} Doa`;
         }
 
-        let activeJuz = null;
-        function openTakeModal(juzNum) {
-            activeJuz = juzNum;
-            document.getElementById('modal-juz-num').innerText = juzNum;
+        function renderRekapDoa() {
+            const listContainer = document.getElementById('rekap-list');
+            listContainer.innerHTML = "";
+
+            let hasDoa = false;
+            juzData.forEach(item => {
+                if (item.dua && item.dua.trim() !== '') {
+                    hasDoa = true;
+                    const div = document.createElement('div');
+                    div.className = "p-3 bg-slate-50 rounded-lg border border-slate-100 text-xs";
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-emerald-700">Juz ${item.juz} - ${item.name || 'Hamba Allah'}</span>
+                            <span class="text-[10px] text-slate-400">WA: ${item.whatsapp || '-'}</span>
+                        </div>
+                        <p class="text-slate-700 italic">"${item.dua}"</p>
+                    `;
+                    listContainer.appendChild(div);
+                }
+            });
+
+            if (!hasDoa) {
+                listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Belum ada doa atau hajat yang terkumpul.</p>`;
+            }
+        }
+
+        function openTakeModal() {
+            const select = document.getElementById('input-juz-num');
+            select.innerHTML = "";
+            let availableCount = 0;
+            
+            juzData.forEach(item => {
+                if (item.status === 'Tersedia') {
+                    availableCount++;
+                    const opt = document.createElement('option');
+                    opt.value = item.juz;
+                    opt.textContent = `Juz ${item.juz}`;
+                    select.appendChild(opt);
+                }
+            });
+
+            if (availableCount === 0) {
+                alert("Semua Juz sudah diambil!");
+                return;
+            }
+
             document.getElementById('take-modal').classList.remove('hidden');
             document.getElementById('take-modal').classList.add('flex');
         }
+
+        function openTakeModalSpecific(juzNum) {
+            openTakeModal();
+            document.getElementById('input-juz-num').value = juzNum;
+        }
+
         function closeTakeModal() {
             document.getElementById('take-modal').classList.add('hidden');
             document.getElementById('take-modal').classList.remove('flex');
@@ -304,12 +462,13 @@
 
         function submitTakeJuz(e) {
             e.preventDefault();
+            const juzNum = document.getElementById('input-juz-num').value;
             const name = document.getElementById('input-name').value;
             const whatsapp = document.getElementById('input-wa').value;
             const dua = document.getElementById('input-dua').value;
 
             closeTakeModal();
-            sendActionToServer({ action: 'take', juz: activeJuz, name, whatsapp, dua });
+            sendActionToServer({ action: 'take', juz: juzNum, name, whatsapp, dua });
         }
 
         function releaseJuz(juzNum) {
@@ -318,8 +477,93 @@
             }
         }
 
-        function toggleKhatam(juzNum) {
+        function toggleSelesai(juzNum) {
             sendActionToServer({ action: 'toggle_khatam', juz: juzNum });
+        }
+
+        // Target Date Modal Admin
+        function openTargetModal() {
+            let savedDate = localStorage.getItem('malam_jumat_date');
+            let targetDate = savedDate ? new Date(savedDate) : getNextThursdayDate();
+            document.getElementById('input-target-date').value = targetDate.toISOString().split('T')[0];
+            document.getElementById('target-modal').classList.remove('hidden');
+            document.getElementById('target-modal').classList.add('flex');
+        }
+        function closeTargetModal() {
+            document.getElementById('target-modal').classList.add('hidden');
+            document.getElementById('target-modal').classList.remove('flex');
+        }
+        function saveTargetDate() {
+            const val = document.getElementById('input-target-date').value;
+            if (val) {
+                let newDate = new Date(val);
+                localStorage.setItem('malam_jumat_date', newDate.toISOString());
+                updateMalamJumatDisplay(newDate);
+                closeTargetModal();
+                alert("Target tanggal malam Jumat berhasil diperbarui!");
+                renderDashboard();
+            }
+        }
+
+        // Reminder WhatsApp Modal Admin
+        function openReminderModal() {
+            const remainingDays = getRemainingDays();
+            const targetStr = getFormattedTargetDateString();
+            const listContainer = document.getElementById('reminder-recipient-list');
+            listContainer.innerHTML = "";
+
+            let uncompletedList = juzData.filter(item => (item.status === 'Sedang Dibaca') && item.whatsapp);
+
+            document.getElementById('reminder-summary-info').innerText = `Ditemukan ${uncompletedList.length} jamaah yang belum menekan tombol Selesai.`;
+
+            if (uncompletedList.length === 0) {
+                listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">Semua pembaca sudah berstatus Selesai atau belum ada yang mengambil Juz.</p>`;
+                document.getElementById('btn-send-reminder').style.display = 'none';
+            } else {
+                document.getElementById('btn-send-reminder').style.display = 'inline-block';
+                uncompletedList.forEach(item => {
+                    let msg = `Assalamu'alaikum warahmatullahi wabarakatuh.\nMohon izin mengingatkan, waktu Anda untuk mengaji Juz ${item.juz} tinggal kurang ${remainingDays} hari lagi menuju malam Jumat, tanggal ${targetStr}.\nMonggo disempatkan untuk menyelesaikan bacaan sesuai rencana ngaji yang telah dipilih.\nSemoga Allah memudahkan dan menerima amal ibadah kita. Aamiin.\nJazakumullahu khairan. 🙏📖`;
+                    
+                    const div = document.createElement('div');
+                    div.className = "p-2 bg-white rounded border border-slate-200";
+                    div.innerHTML = `
+                        <div class="font-bold text-slate-700">Juz ${item.juz} - ${item.name} (${item.whatsapp})</div>
+                        <div class="text-[10px] text-slate-500 italic mt-0.5 truncate">${msg}</div>
+                    `;
+                    listContainer.appendChild(div);
+                });
+            }
+
+            document.getElementById('reminder-modal').classList.remove('hidden');
+            document.getElementById('reminder-modal').classList.add('flex');
+        }
+
+        function closeReminderModal() {
+            document.getElementById('reminder-modal').classList.add('hidden');
+            document.getElementById('reminder-modal').classList.remove('flex');
+        }
+
+        function executeSendReminders() {
+            let uncompletedList = juzData.filter(item => (item.status === 'Sedang Dibaca') && item.whatsapp);
+            if (uncompletedList.length === 0) return;
+
+            const remainingDays = getRemainingDays();
+            const targetStr = getFormattedTargetDateString();
+
+            // Membuka WhatsApp wa.me untuk setiap user secara berurutan/batch aman
+            uncompletedList.forEach((item, index) => {
+                let msg = `Assalamu'alaikum warahmatullahi wabarakatuh.\nMohon izin mengingatkan, waktu Anda untuk mengaji Juz ${item.juz} tinggal kurang ${remainingDays} hari lagi menuju malam Jumat, tanggal ${targetStr}.\nMonggo disempatkan untuk menyelesaikan bacaan sesuai rencana ngaji yang telah dipilih.\nSemoga Allah memudahkan dan menerima amal ibadah kita. Aamiin.\nJazakumullahu khairan. 🙏📖`;
+                let cleanPhone = item.whatsapp.replace(/\D/g, '');
+                if (cleanPhone.startsWith('0')) {
+                    cleanPhone = '62' + cleanPhone.slice(1);
+                }
+                setTimeout(() => {
+                    window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(msg)}`, '_blank');
+                }, index * 800);
+            });
+
+            alert(`Berhasil memproses ${uncompletedList.length} pesan pengingat WhatsApp.`);
+            closeReminderModal();
         }
 
         function resetJumatData() {
@@ -341,6 +585,7 @@
                     isAdmin = true;
                     document.getElementById('mode-display').innerText = "Admin";
                     document.getElementById('admin-controls').classList.remove('hidden');
+                    document.getElementById('admin-reminder-menu').classList.remove('hidden');
                     document.getElementById('admin-toggle-btn').innerText = "Keluar";
                     renderDashboard();
                 } else if (pin !== null) {
@@ -350,6 +595,7 @@
                 isAdmin = false;
                 document.getElementById('mode-display').innerText = "Jamaah";
                 document.getElementById('admin-controls').classList.add('hidden');
+                document.getElementById('admin-reminder-menu').classList.add('hidden');
                 document.getElementById('admin-toggle-btn').innerText = "Admin";
                 renderDashboard();
             }
