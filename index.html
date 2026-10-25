@@ -40,6 +40,7 @@
             <div class="flex gap-2">
                 <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white transition shadow-sm">Dashboard Juz (30)</button>
                 <button onclick="switchTab('rekap')" id="tab-rekap" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm">🤲 Rekap Doa Hajat</button>
+                <button onclick="switchTab('history')" id="tab-history" class="hidden px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm">📊 Riwayat Reminder</button>
             </div>
             <div id="admin-reminder-menu" class="hidden">
                 <button onclick="openReminderModal()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white transition shadow-sm flex items-center gap-1">
@@ -67,7 +68,6 @@
 
         <!-- VIEW 1: DASHBOARD JUZ -->
         <div id="view-dashboard">
-            <!-- Filter Tabs -->
             <div class="flex flex-wrap gap-1.5 mb-4" id="filter-tabs">
                 <button onclick="setFilter('Semua')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition shadow-sm" data-filter="Semua">Semua</button>
                 <button onclick="setFilter('Tersedia')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm" data-filter="Tersedia">Tersedia</button>
@@ -75,7 +75,6 @@
                 <button onclick="setFilter('Selesai')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm" data-filter="Selesai">Selesai</button>
             </div>
 
-            <!-- Stats Overview -->
             <div class="grid grid-cols-3 gap-2.5 mb-5">
                 <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between">
                     <p class="text-[10px] text-slate-500 font-medium">Progress</p>
@@ -91,19 +90,22 @@
                 </div>
             </div>
 
-            <!-- Juz Grid -->
-            <div id="juz-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
-                <!-- Rendered by JavaScript -->
-            </div>
+            <div id="juz-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5"></div>
         </div>
 
         <!-- VIEW 2: REKAP DOA HAJAT -->
         <div id="view-rekap" class="hidden space-y-3">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
                 <h3 class="font-bold text-slate-800 mb-3 text-sm flex items-center gap-2">🤲 Daftar Rekap Doa & Hajat Jamaah</h3>
-                <div id="rekap-list" class="space-y-2.5">
-                    <!-- Rendered by JavaScript -->
-                </div>
+                <div id="rekap-list" class="space-y-2.5"></div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: RIWAYAT REMINDER -->
+        <div id="view-history" class="hidden space-y-3">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                <h3 class="font-bold text-slate-800 mb-3 text-sm flex items-center gap-2">📊 Riwayat Pengiriman Reminder WhatsApp</h3>
+                <div id="history-list" class="space-y-2.5 overflow-x-auto"></div>
             </div>
         </div>
 
@@ -117,8 +119,7 @@
                 <div class="space-y-3">
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-600 mb-1">Pilih Nomor Juz</label>
-                        <select id="input-juz-num" required class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
-                        </select>
+                        <select id="input-juz-num" required class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"></select>
                     </div>
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nama Lengkap</label>
@@ -141,7 +142,7 @@
         </div>
     </div>
 
-    <!-- Modal Pengaturan Target Malam Jumat -->
+    <!-- Modal Target Malam Jumat -->
     <div id="target-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl relative">
             <h3 class="text-base font-bold text-slate-800 mb-1">Pengaturan Target Malam Jumat</h3>
@@ -157,13 +158,12 @@
     <!-- Modal Reminder WhatsApp Admin -->
     <div id="reminder-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-xl relative">
-            <h3 class="text-base font-bold text-slate-800 mb-1">📢 Kirim Reminder Ngaji</h3>
+            <h3 class="text-base font-bold text-slate-800 mb-1">📢 Kirim Reminder Ngaji (Backend API)</h3>
             <p id="reminder-summary-info" class="text-[11px] text-slate-500 mb-3">Memeriksa jumlah penerima...</p>
-            <div id="reminder-recipient-list" class="max-h-48 overflow-y-auto space-y-2 mb-4 border border-slate-100 p-2 rounded bg-slate-50 text-xs">
-            </div>
+            <div id="reminder-recipient-list" class="max-h-48 overflow-y-auto space-y-2 mb-4 border border-slate-100 p-2 rounded bg-slate-50 text-xs"></div>
             <div class="flex justify-end gap-2">
                 <button type="button" onclick="closeReminderModal()" class="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50">Tutup</button>
-                <button type="button" id="btn-send-reminder" onclick="executeSendReminders()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-medium transition">Kirim Pesan WhatsApp</button>
+                <button type="button" id="btn-send-reminder" onclick="executeSendRemindersBackend()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-medium transition">Kirim Otomatis via Server</button>
             </div>
         </div>
     </div>
@@ -184,10 +184,11 @@
     <script>
         const ADMIN_PIN = "945326";
         let isAdmin = false;
-        let API_URL = "https://script.google.com/macros/s/AKfycbxFhN3pnjnTwYvNy-fM_YuO9CzFVHTDHhvoXpv7fTykKPVKzCp7NoGO3XAhHt0SNqCz/exec";
+        let API_URL = "https://script.google.com/macros/s/AKfycbxpJIC14pnJhmFCOzI7aNAORl6FFjMPZ4dY-eZOeqF5MbrDTj9rroO991rTKHtA5MDx/exec";
         let currentFilter = 'Semua';
         let currentTab = 'dashboard';
         let juzData = [];
+        let historyData = [];
 
         for (let i = 1; i <= 30; i++) {
             juzData.push({ juz: i, status: "Tersedia", name: "", whatsapp: "", dua: "" });
@@ -208,20 +209,27 @@
             currentTab = tab;
             const btnDash = document.getElementById('tab-dashboard');
             const btnRekap = document.getElementById('tab-rekap');
+            const btnHistory = document.getElementById('tab-history');
             const viewDash = document.getElementById('view-dashboard');
             const viewRekap = document.getElementById('view-rekap');
+            const viewHistory = document.getElementById('view-history');
+
+            [btnDash, btnRekap, btnHistory].forEach(b => {
+                b.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm";
+            });
+            [viewDash, viewRekap, viewHistory].forEach(v => v.classList.add('hidden'));
 
             if (tab === 'dashboard') {
                 btnDash.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white transition shadow-sm";
-                btnRekap.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm";
                 viewDash.classList.remove('hidden');
-                viewRekap.classList.add('hidden');
-            } else {
+            } else if (tab === 'rekap') {
                 btnRekap.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white transition shadow-sm";
-                btnDash.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition shadow-sm";
                 viewRekap.classList.remove('hidden');
-                viewDash.classList.add('hidden');
                 renderRekapDoa();
+            } else if (tab === 'history') {
+                btnHistory.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white transition shadow-sm";
+                viewHistory.classList.remove('hidden');
+                renderHistoryList();
             }
         }
 
@@ -288,12 +296,14 @@
             setSyncStatus('syncing', 'Sinkron...');
             try {
                 const response = await fetch(API_URL);
-                const data = await response.json();
-                if (Array.isArray(data) && data.length > 0) {
-                    juzData = data;
+                const resData = await response.json();
+                if (resData.juz_data && Array.isArray(resData.juz_data)) {
+                    juzData = resData.juz_data;
+                    historyData = resData.history || [];
                     setSyncStatus('online', 'Terhubung Server');
                     renderDashboard();
                     if (currentTab === 'rekap') renderRekapDoa();
+                    if (currentTab === 'history') renderHistoryList();
                 }
             } catch (err) {
                 console.error(err);
@@ -311,12 +321,19 @@
                 const params = new URLSearchParams(payload).toString();
                 const targetUrl = API_URL.includes('?') ? `${API_URL}&${params}` : `${API_URL}?${params}`;
                 const response = await fetch(targetUrl);
-                await response.json();
+                const result = await response.json();
+                
+                // Jika aksi kirim reminder dari backend
+                if (payload.action === 'send_reminders') {
+                    alert(`Pengiriman selesai!\nTotal: ${result.total}\nBerhasil: ${result.success}\nGagal: ${result.fail}`);
+                    closeReminderModal();
+                }
+                
                 await fetchDataFromServer();
             } catch (err) {
                 console.error(err);
                 setSyncStatus('offline', 'Gagal simpan');
-                alert("Gagal menyimpan ke server.");
+                alert("Gagal memproses ke server.");
             }
         }
 
@@ -402,7 +419,6 @@
         function renderRekapDoa() {
             const listContainer = document.getElementById('rekap-list');
             listContainer.innerHTML = "";
-
             let hasDoa = false;
             juzData.forEach(item => {
                 if (item.dua && item.dua.trim() !== '') {
@@ -419,17 +435,35 @@
                     listContainer.appendChild(div);
                 }
             });
-
             if (!hasDoa) {
                 listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Belum ada doa atau hajat yang terkumpul.</p>`;
             }
+        }
+
+        function renderHistoryList() {
+            const listContainer = document.getElementById('history-list');
+            listContainer.innerHTML = "";
+            if (!historyData || historyData.length === 0) {
+                listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Belum ada riwayat pengiriman reminder.</p>`;
+                return;
+            }
+            let html = `<table class="w-full text-left border-collapse text-xs">
+                <thead><tr class="bg-slate-100 border-b">
+                    <th class="p-2">Waktu</th><th class="p-2">Target</th><th class="p-2">Total</th><th class="p-2">Berhasil</th><th class="p-2">Gagal</th><th class="p-2">Detail Gagal</th>
+                </tr></thead><tbody>`;
+            historyData.forEach(h => {
+                html += `<tr class="border-b"><td class="p-2">${new Date(h.timestamp).toLocaleString('id-ID')}</td>
+                <td class="p-2">${h.target_date}</td><td class="p-2">${h.total}</td><td class="p-2 text-emerald-600 font-bold">${h.success}</td>
+                <td class="p-2 text-rose-600 font-bold">${h.fail}</td><td class="p-2 text-slate-500">${h.failed_details || '-'}</td></tr>`;
+            });
+            html += `</tbody></table>`;
+            listContainer.innerHTML = html;
         }
 
         function openTakeModal() {
             const select = document.getElementById('input-juz-num');
             select.innerHTML = "";
             let availableCount = 0;
-            
             juzData.forEach(item => {
                 if (item.status === 'Tersedia') {
                     availableCount++;
@@ -439,12 +473,10 @@
                     select.appendChild(opt);
                 }
             });
-
             if (availableCount === 0) {
                 alert("Semua Juz sudah diambil!");
                 return;
             }
-
             document.getElementById('take-modal').classList.remove('hidden');
             document.getElementById('take-modal').classList.add('flex');
         }
@@ -466,7 +498,6 @@
             const name = document.getElementById('input-name').value;
             const whatsapp = document.getElementById('input-wa').value;
             const dua = document.getElementById('input-dua').value;
-
             closeTakeModal();
             sendActionToServer({ action: 'take', juz: juzNum, name, whatsapp, dua });
         }
@@ -481,7 +512,6 @@
             sendActionToServer({ action: 'toggle_khatam', juz: juzNum });
         }
 
-        // Target Date Modal Admin
         function openTargetModal() {
             let savedDate = localStorage.getItem('malam_jumat_date');
             let targetDate = savedDate ? new Date(savedDate) : getNextThursdayDate();
@@ -505,15 +535,10 @@
             }
         }
 
-        // Reminder WhatsApp Modal Admin
         function openReminderModal() {
-            const remainingDays = getRemainingDays();
-            const targetStr = getFormattedTargetDateString();
             const listContainer = document.getElementById('reminder-recipient-list');
             listContainer.innerHTML = "";
-
             let uncompletedList = juzData.filter(item => (item.status === 'Sedang Dibaca') && item.whatsapp);
-
             document.getElementById('reminder-summary-info').innerText = `Ditemukan ${uncompletedList.length} jamaah yang belum menekan tombol Selesai.`;
 
             if (uncompletedList.length === 0) {
@@ -522,18 +547,12 @@
             } else {
                 document.getElementById('btn-send-reminder').style.display = 'inline-block';
                 uncompletedList.forEach(item => {
-                    let msg = `Assalamu'alaikum warahmatullahi wabarakatuh.\nMohon izin mengingatkan, waktu Anda untuk mengaji Juz ${item.juz} tinggal kurang ${remainingDays} hari lagi menuju malam Jumat, tanggal ${targetStr}.\nMonggo disempatkan untuk menyelesaikan bacaan sesuai rencana ngaji yang telah dipilih.\nSemoga Allah memudahkan dan menerima amal ibadah kita. Aamiin.\nJazakumullahu khairan. 🙏📖`;
-                    
                     const div = document.createElement('div');
                     div.className = "p-2 bg-white rounded border border-slate-200";
-                    div.innerHTML = `
-                        <div class="font-bold text-slate-700">Juz ${item.juz} - ${item.name} (${item.whatsapp})</div>
-                        <div class="text-[10px] text-slate-500 italic mt-0.5 truncate">${msg}</div>
-                    `;
+                    div.innerHTML = `<div class="font-bold text-slate-700">Juz ${item.juz} - ${item.name} (${item.whatsapp})</div>`;
                     listContainer.appendChild(div);
                 });
             }
-
             document.getElementById('reminder-modal').classList.remove('hidden');
             document.getElementById('reminder-modal').classList.add('flex');
         }
@@ -543,26 +562,18 @@
             document.getElementById('reminder-modal').classList.remove('flex');
         }
 
-        function executeSendReminders() {
+        // Eksekusi pengiriman melalui backend server (Aman & Otomatis)
+        function executeSendRemindersBackend() {
             let uncompletedList = juzData.filter(item => (item.status === 'Sedang Dibaca') && item.whatsapp);
             if (uncompletedList.length === 0) return;
 
-            const remainingDays = getRemainingDays();
-            const targetStr = getFormattedTargetDateString();
-
-            uncompletedList.forEach((item, index) => {
-                let msg = `Assalamu'alaikum warahmatullahi wabarakatuh.\nMohon izin mengingatkan, waktu Anda untuk mengaji Juz ${item.juz} tinggal kurang ${remainingDays} hari lagi menuju malam Jumat, tanggal ${targetStr}.\nMonggo disempatkan untuk menyelesaikan bacaan sesuai rencana ngaji yang telah dipilih.\nSemoga Allah memudahkan dan menerima amal ibadah kita. Aamiin.\nJazakumullahu khairan. 🙏📖`;
-                let cleanPhone = item.whatsapp.replace(/\D/g, '');
-                if (cleanPhone.startsWith('0')) {
-                    cleanPhone = '62' + cleanPhone.slice(1);
-                }
-                setTimeout(() => {
-                    window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(msg)}`, '_blank');
-                }, index * 800);
-            });
-
-            alert(`Berhasil memproses ${uncompletedList.length} pesan pengingat WhatsApp.`);
-            closeReminderModal();
+            if (confirm(`Yakin ingin mengirim reminder otomatis ke ${uncompletedList.length} jamaah via server backend?`)) {
+                sendActionToServer({
+                    action: 'send_reminders',
+                    target_date: getFormattedTargetDateString(),
+                    remaining_days: getRemainingDays()
+                });
+            }
         }
 
         function resetJumatData() {
@@ -572,7 +583,6 @@
                 targetDate.setDate(targetDate.getDate() + 7);
                 localStorage.setItem('malam_jumat_date', targetDate.toISOString());
                 updateMalamJumatDisplay(targetDate);
-
                 sendActionToServer({ action: 'reset' });
             }
         }
@@ -585,6 +595,7 @@
                     document.getElementById('mode-display').innerText = "Admin";
                     document.getElementById('admin-controls').classList.remove('hidden');
                     document.getElementById('admin-reminder-menu').classList.remove('hidden');
+                    document.getElementById('tab-history').classList.remove('hidden');
                     document.getElementById('admin-toggle-btn').innerText = "Keluar";
                     renderDashboard();
                 } else if (pin !== null) {
@@ -595,6 +606,8 @@
                 document.getElementById('mode-display').innerText = "Jamaah";
                 document.getElementById('admin-controls').classList.add('hidden');
                 document.getElementById('admin-reminder-menu').classList.add('hidden');
+                document.getElementById('tab-history').classList.add('hidden');
+                if (currentTab === 'history') switchTab('dashboard');
                 document.getElementById('admin-toggle-btn').innerText = "Admin";
                 renderDashboard();
             }
