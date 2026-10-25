@@ -323,7 +323,6 @@
                 const response = await fetch(targetUrl);
                 const result = await response.json();
                 
-                // Jika aksi kirim reminder dari backend
                 if (payload.action === 'send_reminders') {
                     alert(`Pengiriman selesai!\nTotal: ${result.total}\nBerhasil: ${result.success}\nGagal: ${result.fail}`);
                     closeReminderModal();
@@ -562,7 +561,6 @@
             document.getElementById('reminder-modal').classList.remove('flex');
         }
 
-        // Eksekusi pengiriman melalui backend server (Aman & Otomatis)
         function executeSendRemindersBackend() {
             let uncompletedList = juzData.filter(item => (item.status === 'Sedang Dibaca') && item.whatsapp);
             if (uncompletedList.length === 0) return;
