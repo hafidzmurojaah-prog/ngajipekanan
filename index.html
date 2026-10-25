@@ -184,7 +184,7 @@
     <script>
         const ADMIN_PIN = "945326";
         let isAdmin = false;
-        let API_URL = "https://script.google.com/macros/s/AKfycbxUtTuo40sxJJfkha1N7WbQabDVOzgPfqqjr9u9HB1ikHJYbzAoEsfz0MP2yJfYzOc-/exec";
+        let API_URL = localStorage.getItem('khotmil_api_url') || "";
         let currentFilter = 'Semua';
         let currentTab = 'dashboard';
         let juzData = [];
@@ -550,7 +550,6 @@
             const remainingDays = getRemainingDays();
             const targetStr = getFormattedTargetDateString();
 
-            // Membuka WhatsApp wa.me untuk setiap user secara berurutan/batch aman
             uncompletedList.forEach((item, index) => {
                 let msg = `Assalamu'alaikum warahmatullahi wabarakatuh.\nMohon izin mengingatkan, waktu Anda untuk mengaji Juz ${item.juz} tinggal kurang ${remainingDays} hari lagi menuju malam Jumat, tanggal ${targetStr}.\nMonggo disempatkan untuk menyelesaikan bacaan sesuai rencana ngaji yang telah dipilih.\nSemoga Allah memudahkan dan menerima amal ibadah kita. Aamiin.\nJazakumullahu khairan. 🙏📖`;
                 let cleanPhone = item.whatsapp.replace(/\D/g, '');
